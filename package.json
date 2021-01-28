@@ -15,7 +15,7 @@
     "start": "node src/init"
   },
   "bin": {
-    "cli-init": "src/init.js"
+    "cli": "src/init.js"
   },
   "repository": "git@github.com:776A0A/demo-cli.git",
   "author": "776A0A <240508428@qq.com>",

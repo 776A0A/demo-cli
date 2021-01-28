@@ -3,11 +3,9 @@
 const commander = require("commander");
 const path = require("path");
 const pkg = require("../package.json");
-const prompt = require("./prompt");
+const prompts = require("./prompts");
 const download = require("./download");
 const downloadDeps = require("./deps");
-
-let projectName;
 
 commander
   .version(pkg.version, "-v, --version")
@@ -15,13 +13,37 @@ commander
   .description("initial a project")
   .option("-h, --help", "init project-name")
   .action((name, options) => {
-    projectName = name;
+    startPrompt(name);
   })
   .parse(process.argv);
 
-prompt().then(async (answers) => {
-  const projectPath = path.join(process.cwd(), projectName);
+function startPrompt(projectName) {
+  prompts.start().then(async ({ preset }) => {
+    const presetAnswers = prompts.answers.presets;
 
-  await download(projectPath);
-  downloadDeps(projectPath);
-});
+    let isManually = false;
+    if (preset === presetAnswers.manually) {
+      isManually = true;
+    }
+
+    if (isManually) {
+      prompts.selectFeatures().then((answers) => {
+        const {
+          commitizen,
+          changelog,
+          eslint,
+          prettier,
+          editorConfig,
+          husky,
+          lintStaged,
+        } = answers;
+        console.log({ answers });
+      });
+    }
+
+    const projectPath = path.join(process.cwd(), projectName);
+
+    await download(projectPath, isManually);
+    downloadDeps(projectPath);
+  });
+}
