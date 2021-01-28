@@ -18,5 +18,8 @@
     "cli-init": "src/init.js"
   },
   "repository": "git@github.com:776A0A/demo-cli.git",
-  "author": "776A0A <240508428@qq.com>"
+  "author": "776A0A <240508428@qq.com>",
+  "dependencies": {
+    "boxen": "^5.0.0"
+  }
 }

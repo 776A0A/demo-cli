@@ -9,6 +9,8 @@ const pkg = require("../package.json");
 const prompt = inquirer.createPromptModule();
 const path = require("path");
 const { exec, execSync } = require("child_process");
+const spawn = require("child_process").spawn;
+const boxen = require("boxen");
 
 let projectName;
 
@@ -48,7 +50,7 @@ prompt([
   },
 ]).then(async (answers) => {
   const projectPath = path.join(process.cwd(), projectName);
-  const spinner = ora(`downloading... to ${projectPath}`);
+  let spinner = ora(`downloading... to ${projectPath}`);
   spinner.start();
   const sourceURL = "github:776A0A/sharedjs-shared";
   download(sourceURL, projectPath, { clone: false }, (err) => {
@@ -58,14 +60,37 @@ prompt([
       return;
     }
     spinner.succeed("succeed!!!\n" + "downloaded to " + projectPath);
-    spinner.start(`started to download deps`);
-    exec(`cd ${projectPath}`, async (err, stdout, stderr) => {
-      if (err) {
+    spinner = ora("started to download deps");
+    spinner.start();
+
+    let hasYarn = false;
+    let hasCnpm = false;
+    try {
+      execSync("yarn --version", { stdio: "ignore" });
+      hasYarn = true;
+    } catch (error) {}
+    if (!hasYarn) {
+      try {
+        execSync("cnpm -v", { stdio: "ignore" });
+        hasCnpm = true;
+      } catch (error) {}
+    }
+    
+    const installCommand = hasYarn ? `yarn` : hasCnpm ? `cnpm i` : "npm i";
+
+    spawn(installCommand, [], { stdio: "inherit", shell: true })
+      .on("exit", () => {
+        const succeedMessage = boxen("download deps succeed!!", {
+          align: "center",
+          borderColor: "greenBright",
+          borderStyle: "classic",
+          padding: 1,
+        });
+        spinner.succeed("\n" + succeedMessage + "\n");
+      })
+      .on("error", (err) => {
+        console.log({ err });
         spinner.fail("download deps failed!");
-        throw err;
-      }
-      await execSync(`yarn`);
-      spinner.succeed("download deps succeed!");
-    });
+      });
   });
 });
