@@ -1,12 +1,14 @@
+#!/usr/bin/env node
+
 const commander = require("commander");
 const inquirer = require("inquirer");
 const chalk = require("chalk");
 const ora = require("ora");
-const progress = require("progress");
 const download = require("download-git-repo");
 const pkg = require("../package.json");
 const prompt = inquirer.createPromptModule();
 const path = require("path");
+const { exec, execSync } = require("child_process");
 
 let projectName;
 
@@ -46,20 +48,24 @@ prompt([
   },
 ]).then(async (answers) => {
   const projectPath = path.join(process.cwd(), projectName);
-  const spinner = ora("downloading...");
+  const spinner = ora(`downloading... to ${projectPath}`);
   spinner.start();
   const sourceURL = "github:776A0A/sharedjs-shared";
-  const temp = await download(
-    sourceURL,
-    projectPath,
-    { clone: false },
-    (err) => {
-      if (err) {
-        console.log({ err });
-        spinner.fail("failed!!");
-        return
-      }
-      spinner.succeed("succeed!!!");
+  download(sourceURL, projectPath, { clone: false }, (err) => {
+    if (err) {
+      console.log({ err });
+      spinner.fail("failed!!");
+      return;
     }
-  );
+    spinner.succeed("succeed!!!\n" + "downloaded to " + projectPath);
+    spinner.start(`started to download deps`);
+    exec(`cd ${projectPath}`, async (err, stdout, stderr) => {
+      if (err) {
+        spinner.fail("download deps failed!");
+        throw err;
+      }
+      await execSync(`yarn`);
+      spinner.succeed("download deps succeed!");
+    });
+  });
 });
