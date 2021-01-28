@@ -75,10 +75,15 @@ prompt([
         hasCnpm = true;
       } catch (error) {}
     }
-    
-    const installCommand = hasYarn ? `yarn` : hasCnpm ? `cnpm i` : "npm i";
 
-    spawn(installCommand, [], { stdio: "inherit", shell: true })
+    const installCommand = hasYarn ? `yarn` : hasCnpm ? `cnpm i` : "npm i";
+    const initCommand = hasYarn ? `yarn init -y` : `npm init -y`;
+
+    spawn(installCommand, [], {
+      cwd: projectPath,
+      stdio: "inherit",
+      shell: true,
+    })
       .on("exit", () => {
         const succeedMessage = boxen("download deps succeed!!", {
           align: "center",
