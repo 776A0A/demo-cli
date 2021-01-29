@@ -1,13 +1,13 @@
-const inquirer = require("inquirer");
+const inquirer = require('inquirer')
 
 const inputLicense = () => {
-  return inquirer.prompt([
-    {
-      type: "input",
-      name: "license",
-      message: "Input license",
-    },
-  ]);
-};
+    return inquirer.prompt([
+        {
+            type: 'input',
+            name: 'license',
+            message: 'Input license',
+        },
+    ])
+}
 
-module.exports = inputLicense;
+module.exports = inputLicense
