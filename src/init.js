@@ -3,7 +3,7 @@
 const commander = require("commander");
 const path = require("path");
 const pkg = require("../package.json");
-const prompts = require("./prompts");
+const prompts = require("./prompts/index");
 const download = require("./download");
 const downloadDeps = require("./deps");
 
@@ -17,33 +17,44 @@ commander
   })
   .parse(process.argv);
 
-function startPrompt(projectName) {
-  prompts.start().then(async ({ preset }) => {
-    const presetAnswers = prompts.answers.presets;
+const allAnswers = {};
+async function promptAndSaveAnswers(promptType) {
+  const answers = await prompts[promptType]();
+  Object.assign(allAnswers, answers);
+  return answers;
+}
 
-    let isManually = false;
-    if (preset === presetAnswers.manually) {
-      isManually = true;
+async function startPrompt(projectName) {
+  {
+    const answers = await promptAndSaveAnswers("start");
+
+    const license = answers.license;
+    if (license === prompts.answers.licenses["Input other license"]) {
+      await promptAndSaveAnswers("inputLicense");
     }
+  }
 
-    if (isManually) {
-      prompts.selectFeatures().then((answers) => {
-        const {
-          commitizen,
-          changelog,
-          eslint,
-          prettier,
-          editorConfig,
-          husky,
-          lintStaged,
-        } = answers;
-        console.log({ answers });
-      });
+  {
+    const answers = await promptAndSaveAnswers("selectPreset");
+
+    if (answers.preset === prompts.answers.presets.manually) {
+      const answers = await promptAndSaveAnswers("selectFeatures");
+
+      const {
+        commitizen,
+        changelog,
+        eslint,
+        prettier,
+        editorConfig,
+        husky,
+        lintStaged,
+      } = answers;
+      console.log({ answers });
     }
+  }
 
-    const projectPath = path.join(process.cwd(), projectName);
+  const projectPath = path.join(process.cwd(), projectName);
 
-    await download(projectPath, isManually);
-    downloadDeps(projectPath);
-  });
+  // await download(projectPath, isManually);
+  // downloadDeps(projectPath);
 }
