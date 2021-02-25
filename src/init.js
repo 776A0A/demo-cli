@@ -23,7 +23,7 @@ async function startPrompt(projectName) {
 
     const projectPath = path.join(process.cwd(), projectName)
 
-    await download(projectPath) // 下载基础模版
+    const template =  await download(projectPath) // 下载基础模版
     generator(answers) // 根据答案生成配置
     downloadDeps(projectPath) // 根据配置安装依赖
 }
