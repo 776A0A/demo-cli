@@ -1,5 +1,6 @@
 const generatePkg = require('../generatePkg')
 const promptAnswers = require('../prompts/answers')
+const { merge } = require('../utils')
 
 module.exports = (answers) => {
     const {
@@ -28,26 +29,4 @@ module.exports = (answers) => {
     pkg = generatePkg({ name: projectName, ...pkg })
 
     console.log(pkg)
-}
-
-function merge(o1, o2) {
-    const keys = Object.keys(o2)
-
-    const result = { ...o1 }
-
-    for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        if (!result[key]) {
-            result[key] = o2[key]
-        } else if (
-            typeof o2[key] === 'object' &&
-            typeof result[key] === 'object'
-        ) {
-            result[key] = merge(result[key], o2[key])
-        }
-    }
-
-    // console.log({ result })
-
-    return result
 }

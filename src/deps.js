@@ -1,7 +1,7 @@
 const ora = require('ora')
 const spawn = require('child_process').spawn
 const boxen = require('boxen')
-const getPkgManager = require('./utils/pkgManager')
+const { getPkgManager } = require('./utils')
 
 module.exports = (projectPath) => {
     const spinner = ora('started to download deps')
